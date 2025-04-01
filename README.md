@@ -24,12 +24,17 @@ Here are the steps:
     git clone https://github.com/QuesmaOrg/observability-query-language.git
     ```
 
-2. Build and run. The first build may take a few minutes:
+2. Copy `.env.example` to `.env` (by default it will use ClickHouse running in Docker):
+    ```bash
+    cp .env.example .env
+    ```
+
+3. Build and run. The first build may take a few minutes:
     ```bash
     docker compose up --build
     ```
 
-3. Click here to start exploring:  
+4. Click here to start exploring:  
     [http://localhost:3000/a/quesma-oql-app](http://localhost:3000/a/quesma-oql-app)
 
 ## Examples 
