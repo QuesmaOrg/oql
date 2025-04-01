@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "app",
+  "name": "Observability Query Language",
+  "id": "quesma-oql-app",
+  "backend": true,
+  "executable": "qpx_oql",
+  "info": {
+    "keywords": ["app"],
+    "description": "",
+    "author": {
+      "name": "Quesma"
+    },
+    "logos": {
+      "small": "img/logo.png",
+      "large": "img/logo.png"
+    },
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "Observability Query Language",
+      "path": "/a/%PLUGIN_ID%/one",
+      "addToNav": true,
+      "defaultNav": true
+    }
+
+  ],
+  "dependencies": {
+    "grafanaDependency": ">=10.4.0",
+    "plugins": []
+  }
+}

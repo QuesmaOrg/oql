@@ -1,0 +1,95 @@
+services:
+  builder:
+    build:
+      context: ./builder
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - go-cache:/root/.cache/go-build
+      - go-mod-cache:/go/pkg/mod
+    working_dir: /app
+    command: bash -c "cd /app && mage -v && npm install && npm run build"
+
+  grafana:
+    user: root
+    container_name: 'quesma-oql-app'
+
+    build:
+      context: .config/
+      args:
+        grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
+        grafana_version: ${GRAFANA_VERSION:-11.5.2}
+        development: ${DEVELOPMENT:-false}
+        anonymous_auth_enabled: ${ANONYMOUS_AUTH_ENABLED:-true}
+    ports:
+      - 3000:3000/tcp
+      - 2345:2345/tcp # delve
+    security_opt:
+      - 'apparmor:unconfined'
+      - 'seccomp:unconfined'
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ./dist:/var/lib/grafana/plugins/quesma-oql-app
+      - ./provisioning:/etc/grafana/provisioning
+      - .:/root/quesma-oql-app
+
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: development
+      GF_LOG_FILTERS: plugin.quesma-oql-app:debug
+      GF_LOG_LEVEL: debug
+      GF_DATAPROXY_LOGGING: 1
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: quesma-oql-app
+    depends_on:
+      builder:
+        condition: service_completed_successfully
+      npm-dev-server:
+        condition: service_healthy
+
+  npm-dev-server:
+    build:
+      context: ./builder
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8080:8080"
+      - "35729:35729"
+    command: npm run dev
+    depends_on:
+      builder:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:35729"]
+      interval: 1s
+      timeout: 1s
+      start_period: 1s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.5.3.5-alpine
+    ports:
+      - "18123:8123"
+      - "19000:9000"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://clickhouse:8123/ping || exit 1
+      interval: 1s
+      timeout: 1s
+      start_period: 1m
+  data-loader:
+    container_name: data-loader
+    image: python:3.9-slim
+    volumes:
+      - ./datasets:/app
+    working_dir: /app
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    command: bash -c "pip install clickhouse-driver && python load_ips.py && python load_apache.py && python load_hadoop.py && python load_linux.py && python load_openssh.py"
+
+volumes:
+  go-cache:
+  go-mod-cache:
