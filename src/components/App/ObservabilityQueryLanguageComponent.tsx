@@ -101,7 +101,6 @@ export default function ObservabilityQueryLanguageComponent() {
   }, []); // Add empty dependency array to run once
 
   useEffect(() => {
-
     setIsLoading(true);
     setError(null);
 
@@ -164,9 +163,9 @@ export default function ObservabilityQueryLanguageComponent() {
   }, []);
 
   const runQuery = useCallback(() => {
-    setActiveQuery(query);
+    setActiveQuery(queryRef.current);
     setQueryTimestamp(Date.now());
-  }, [query]);
+  }, [setActiveQuery, setQueryTimestamp]);
 
   const handleGlyphClick = useCallback((lineNumber: number, isPlay: boolean) => {
     const lines = queryRef.current.split('\n');
@@ -279,6 +278,10 @@ export default function ObservabilityQueryLanguageComponent() {
     setShowAiModal(true);
   }, []);
 
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+  }, [setQuery]);
+
   return (
     <div style={{ paddingLeft: '20px', paddingRight: '20px', paddingTop: '10px', colorScheme: 'dark' }}>
       <h3><img src={logo} alt="Quesma Logo" style={{  height: '35px' }} /> -  Observability Query Language</h3>
@@ -348,13 +351,14 @@ export default function ObservabilityQueryLanguageComponent() {
 
               <Editor
                 query={query}
-                onChange={useCallback((value: string) => setQuery(value), [setQuery])}
+                onChange={handleQueryChange}
                 startDate={startDate}
                 endDate={endDate}
                 tableDefinitions={tableDefinitions}
                 tableName={currentTable}
                 onGlyphClick={handleGlyphClick}
                 onAiModalOpen={handleAiModalOpen}
+                onEnter={runQuery}
               />
             </div>
 
