@@ -21,7 +21,7 @@ Here are the steps:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/QuesmaOrg/observability-query-language.git
+    git clone https://github.com/QuesmaOrg/oql.git
     ```
 
 2. Copy `.env.example` to `.env` (by default it will use ClickHouse running in Docker):
