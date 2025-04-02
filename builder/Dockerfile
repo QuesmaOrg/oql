@@ -28,3 +28,6 @@ RUN nvm use 20
 RUN apt-get install -y golang-go
 RUN go install github.com/magefile/mage@latest
 RUN cp /root/go/bin/mage /usr/local/bin/mage
+
+ENV GO111MODULE=on
+ENV GOPROXY=https://proxy.golang.org
