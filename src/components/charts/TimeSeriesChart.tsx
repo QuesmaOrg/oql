@@ -3,7 +3,7 @@
 import ReactECharts, { EChartsOption } from 'echarts-for-react';
 import { format } from 'date-fns';
 import { parseDate } from '../../lib/daterange';
-import React, { useState, useEffect, memo, useRef } from 'react';
+import React, { useState, useEffect, memo, useRef, useCallback } from 'react';
 import { getBackendSrv } from '@grafana/runtime';
 import { getBackendUrl } from '../../constants';
 const formatNumber = (num: number) => {
@@ -42,6 +42,29 @@ function TimeSeriesChartBase(params: {
     startTs: 0,
     endTs: 0
   });
+
+  // Add throttling timer ref
+  const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Throttled version of onDateRangeSelect
+  const throttledDateRangeSelect = useCallback((startDate: string, endDate: string) => {
+    if (throttleTimerRef.current) {
+      clearTimeout(throttleTimerRef.current);
+    }
+
+    throttleTimerRef.current = setTimeout(() => {
+      params.onDateRangeSelect?.(startDate, endDate, whoAmI);
+    }, 150); // 150ms throttle
+  }, [params.onDateRangeSelect]);
+
+  // Cleanup throttle timer
+  useEffect(() => {
+    return () => {
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
 
@@ -258,11 +281,7 @@ function TimeSeriesChartBase(params: {
 
               dataRangeRef.current = { startTs, endTs }; 
               
-              params.onDateRangeSelect?.(
-                startDate,
-                endDate,
-                whoAmI
-              );
+              throttledDateRangeSelect(startDate, endDate);
             }
           }
         }}
@@ -271,32 +290,46 @@ function TimeSeriesChartBase(params: {
   );
 }
 
-// Create a custom comparison function for memo
+// Optimize the comparison function for memo
 const arePropsEqual = (prevProps: any, nextProps: any) => {
+  // Quick equality check for identical objects
+  if (prevProps === nextProps) {
+    return true;
+  }
+
+  // If table changed, must re-render
+  if (prevProps.currentTable !== nextProps.currentTable) {
+    return false;
+  }
+  
+  // If change came from another component, must re-render
+  if (nextProps.whoChanged !== whoAmI) {
+    return false;
+  }
+
   const prevStartTs = parseDate(prevProps.startDate);
   const prevEndTs = parseDate(prevProps.endDate);
   const nextStartTs = parseDate(nextProps.startDate);
   const nextEndTs = parseDate(nextProps.endDate);
 
-  if (prevProps.currentTable !== nextProps.currentTable) {
-    return false
-  }
-  
-  if (nextProps.whoChanged !== whoAmI) {
-    return false;
-  }
-
-  // If the new date range is within the old one, don't re-render
-  if (nextStartTs >= prevStartTs && nextEndTs <= prevEndTs) {
-    return true; // props are equal, don't re-render
-  }
-
-  // If the date range is exactly the same, don't re-render
+  // If dates are exactly the same, don't re-render
   if (prevStartTs === nextStartTs && prevEndTs === nextEndTs) {
     return true;
   }
 
-  return false; // props are different, allow re-render
+  // If new range is within old range, don't re-render
+  if (nextStartTs >= prevStartTs && nextEndTs <= prevEndTs) {
+    return true;
+  }
+
+  // If the difference is less than 1 second, don't re-render
+  const startDiff = Math.abs(nextStartTs - prevStartTs);
+  const endDiff = Math.abs(nextEndTs - prevEndTs);
+  if (startDiff < 1000 && endDiff < 1000) {
+    return true;
+  }
+
+  return false;
 };
 
 // Export the memoized component
