@@ -25,7 +25,13 @@ function  lessThan3Day(startTs: number, endTs: number) {
 const whoAmI = "timeseries-chart";
 
 // Create the base component
-function TimeSeriesChartBase(params: {
+function TimeSeriesChartBase({
+  startDate,
+  endDate,
+  whoChanged,
+  currentTable,
+  onDateRangeSelect
+}: {
   startDate: string
   endDate: string
   whoChanged: string  
@@ -47,15 +53,15 @@ function TimeSeriesChartBase(params: {
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Throttled version of onDateRangeSelect
-  const throttledDateRangeSelect = useCallback((startDate: string, endDate: string) => {
+  const throttledDateRangeSelect = useCallback((newStartDate: string, newEndDate: string) => {
     if (throttleTimerRef.current) {
       clearTimeout(throttleTimerRef.current);
     }
 
     throttleTimerRef.current = setTimeout(() => {
-      params.onDateRangeSelect?.(startDate, endDate, whoAmI);
+      onDateRangeSelect?.(newStartDate, newEndDate, whoAmI);
     }, 150); // 150ms throttle
-  }, [params.onDateRangeSelect]);
+  }, [onDateRangeSelect]);
 
   // Cleanup throttle timer
   useEffect(() => {
@@ -67,16 +73,15 @@ function TimeSeriesChartBase(params: {
   }, []);
 
   useEffect(() => {
-
-    if (params.currentTable == null) {
+    if (currentTable == null) {
       return;
     }
-    if (params.currentTable === "") {
+    if (currentTable === "") {
       return;
     }
 
-    const startTs = parseDate(params.startDate);
-    const endTs = parseDate(params.endDate);
+    const startTs = parseDate(startDate);
+    const endTs = parseDate(endDate);
 
     dataRangeRef.current = { startTs, endTs };
 
@@ -88,7 +93,7 @@ function TimeSeriesChartBase(params: {
       headers: {
         'Content-Type': 'application/json'
       },
-      data: JSON.stringify({ query: "", startDate: startTs, endDate: endTs, tableName: params.currentTable }),
+      data: JSON.stringify({ query: "", startDate: startTs, endDate: endTs, tableName: currentTable }),
       showErrorAlert: false
     }).subscribe({
       next: (resp) => {
@@ -105,8 +110,7 @@ function TimeSeriesChartBase(params: {
       }
     });
 
-
-  }, [params.startDate, params.endDate, params.currentTable]);
+  }, [startDate, endDate, currentTable]);
 
   if (loading) {
     return null;
