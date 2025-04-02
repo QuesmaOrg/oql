@@ -326,4 +326,58 @@
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5 2H7V14H5V2ZM9 2H11V14H9V2Z" fill="%23CC8400"/></svg>') center center no-repeat;
   cursor: pointer;
   background-size: 12px;
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.resize-handle::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-image: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 20%,
+    rgba(204, 204, 220, 0.3) 20%,
+    rgba(204, 204, 220, 0.3) 40%,
+    transparent 40%,
+    transparent 60%,
+    rgba(204, 204, 220, 0.3) 60%,
+    rgba(204, 204, 220, 0.3) 80%,
+    transparent 80%,
+    transparent 100%
+  );
+  transition: all 0.2s ease;
+}
+
+.resize-handle:hover::after {
+  background-image: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 20%,
+    rgba(204, 204, 220, 0.6) 20%,
+    rgba(204, 204, 220, 0.6) 40%,
+    transparent 40%,
+    transparent 60%,
+    rgba(204, 204, 220, 0.6) 60%,
+    rgba(204, 204, 220, 0.6) 80%,
+    transparent 80%,
+    transparent 100%
+  );
+}
+
+/* Remove the hover state since we want it always visible */
+.EditorContainer:hover .resize-handle {
+  opacity: 1;
 } 

@@ -139,6 +139,8 @@ export const Editor: React.FC<EditorProps> = ({ query, onChange, startDate, endD
 	const tableNameRef = useRef<string>(tableName || '');
 	const [editorHeight, setEditorHeight] = useState("250px");
 	const lastMousePosition = useRef({ x: 0, y: 0 });
+	const containerRef = useRef<HTMLDivElement>(null);
+	const isDraggingRef = useRef(false);
 
 	useEffect(() => {
 		tableDefinitionsRef.current = tableDefinitions || [];
@@ -561,8 +563,40 @@ export const Editor: React.FC<EditorProps> = ({ query, onChange, startDate, endD
 		}
 	};
 
+	const handleMouseDown = (e: React.MouseEvent) => {
+		isDraggingRef.current = true;
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+	};
+
+	const handleMouseMove = useCallback((e: MouseEvent) => {
+		if (!isDraggingRef.current || !containerRef.current) return;
+
+		const containerRect = containerRef.current.getBoundingClientRect();
+		const newHeight = Math.max(150, e.clientY - containerRect.top);
+		setEditorHeight(`${newHeight}px`);
+
+		// Trigger Monaco editor layout update
+		if (editorRef.current) {
+			editorRef.current.layout();
+		}
+	}, []);
+
+	const handleMouseUp = useCallback(() => {
+		isDraggingRef.current = false;
+		document.removeEventListener('mousemove', handleMouseMove);
+		document.removeEventListener('mouseup', handleMouseUp);
+	}, [handleMouseMove]);
+
+	useEffect(() => {
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [handleMouseMove, handleMouseUp]);
+
 	return (
-		<div className="EditorContainer">
+		<div ref={containerRef} className="EditorContainer" style={{ position: 'relative' }}>
 			<MonacoEditor
 				height={editorHeight}
 				language="pipe-sql"
@@ -583,7 +617,19 @@ export const Editor: React.FC<EditorProps> = ({ query, onChange, startDate, endD
 				onChange={handleChange}
 				onMount={handleEditorDidMount}
 			/>
-
+			<div 
+				className="resize-handle"
+				onMouseDown={handleMouseDown}
+				style={{
+					position: 'absolute',
+					bottom: 0,
+					right: 0,
+					width: '20px',
+					height: '20px',
+					cursor: 'se-resize',
+					background: 'transparent'
+				}}
+			/>
 		</div>
 	);
 };
