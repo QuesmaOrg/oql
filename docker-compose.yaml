@@ -8,7 +8,7 @@ services:
       - go-cache:/root/.cache/go-build
       - go-mod-cache:/go/pkg/mod
     working_dir: /app
-    command: bash -c "cd /app && mage -v && npm install && npm run build"
+    command: bash -c "cd /app && GOFLAGS=-buildvcs=false mage -v && npm install && npm run build"
 
   grafana:
     user: root
