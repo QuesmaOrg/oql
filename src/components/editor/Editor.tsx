@@ -570,8 +570,9 @@ export const Editor: React.FC<EditorProps> = ({ query, onChange, startDate, endD
 	};
 
 	const handleMouseMove = useCallback((e: MouseEvent) => {
-		if (!isDraggingRef.current || !containerRef.current) return;
-
+		if (!isDraggingRef.current || !containerRef.current) {
+			return;
+		}
 		const containerRect = containerRef.current.getBoundingClientRect();
 		const newHeight = Math.max(150, e.clientY - containerRect.top);
 		setEditorHeight(`${newHeight}px`);
