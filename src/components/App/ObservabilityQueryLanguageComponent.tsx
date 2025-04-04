@@ -6,13 +6,13 @@ import { Editor } from "../editor/Editor";
 import { TableDefinition, TableDefinitionResponse, TabularResult } from "../../lib/types";
 import { getBackendSrv } from '@grafana/runtime';
 import { TimeSeriesChart } from "../charts/TimeSeriesChart";
-import { PlayIcon } from '@heroicons/react/24/solid';
 import { AlertCircle, Loader2Icon } from 'lucide-react';
 import { parseDate } from "../../lib/daterange";
 import { DateRangeSelector } from "../filters/DateRangeSelector";
 import logo from '../../img/quesma-logo-white-transparent-full.png';
 import { AiModal } from "../ai/AiModal";
 import { getBackendUrl } from "../../constants";
+import { ArrowPathIcon } from '@heroicons/react/24/solid';
 
 function extractTableFromQuery(query: string) {
   const regex = /from\s+(\w+)/i;
@@ -314,9 +314,9 @@ export default function ObservabilityQueryLanguageComponent() {
                   disabled={isLoading}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
+                    backgroundColor: 'rgb(59, 130, 246)',
                     color: 'white',
-                    borderRadius: '4px',
+                    borderRadius: '0',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
@@ -324,15 +324,17 @@ export default function ObservabilityQueryLanguageComponent() {
                     cursor: 'pointer',
                     transition: 'background-color 0.2s',
                     opacity: isLoading ? 0.5 : 1,
-                    pointerEvents: isLoading ? 'none' : 'auto'
+                    pointerEvents: isLoading ? 'none' : 'auto',
+                    fontSize: '14px',
+                    fontWeight: '500'
                   }}
                 >
                   {isLoading ? (
-                    <Loader2Icon style={{ width: '20px', height: '20px', animation: 'spin 1s linear infinite' }} />
+                    <Loader2Icon className="animate-spin" style={{ width: '16px', height: '16px' }} />
                   ) : (
-                    <PlayIcon style={{ width: '20px', height: '20px' }} />
+                    <ArrowPathIcon style={{ width: '16px', height: '16px' }} />
                   )}
-                  Run Query
+                  Run query
                 </button>
               </div>
 
