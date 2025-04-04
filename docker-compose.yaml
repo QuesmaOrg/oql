@@ -5,8 +5,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./:/app
-      - go-cache:/root/.cache/go-build
-      - go-mod-cache:/root/go/pkg/mod
+      - go-cache:/root/.cache/go-build/
+      - go-mod-cache:/root/go/pkg/mod/
+      - node_modules:/app/node_modules/
     working_dir: /app
     command: bash -c "cd /app && npm ci &&  GOFLAGS=-buildvcs=false mage -v build:Backend  && npm run build"
 
@@ -54,6 +55,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/app
+      - node_modules:/app/node_modules
     working_dir: /app
     ports:
       - "8080:8080"
@@ -93,3 +95,4 @@ services:
 volumes:
   go-cache:
   go-mod-cache:
+  node_modules:
