@@ -169,18 +169,60 @@ export default function ObservabilityQueryLanguageComponent() {
 
   const handleGlyphClick = useCallback((lineNumber: number, isPlay: boolean) => {
     const lines = queryRef.current.split('\n');
-    if (lineNumber > 0 && lineNumber <= lines.length) {
-      const newLines = [...lines];
-      const line = newLines[lineNumber - 1];
-      if (isPlay) {
-        newLines[lineNumber - 1] = line.replace('|>', '--|>');
-      } else {
-        newLines[lineNumber - 1] = line.replace('--|>', '|>');
-      }
-      setQuery(newLines.join('\n'));
-      setActiveQuery(newLines.join('\n'));
+
+    const commentPattern = '-- ';
+    const continuedCommentPattern = '--\\ ';
+
+    let pattern = '|>';
+    let replacement = '--|>';
+    let shouldComment = true;
+   
+    if (!isPlay) {
+      pattern = '--|>';
+      replacement = '|>';
+      shouldComment = false;
+    } 
+    
+    let currentLine = lineNumber - 1;
+  
+    if (lines[currentLine].trim().startsWith(pattern)) {
+      lines[currentLine] = lines[currentLine].replace(pattern, replacement);
+    } else {
+      console.log("No pipe found at line", lineNumber);
+      return;
     }
-  }, []); // No need for dependencies since we're using ref
+  
+    for (let n = lineNumber; n < lines.length; n++) {
+      const line = lines[n];
+
+      if (line.trim() == "") {
+        continue;
+      }
+
+      // stop when we hit the end of the pipe section
+      if (line.trim().startsWith("--|>") || line.trim().startsWith("|>")) {
+        break;
+      }
+      
+      if (shouldComment) {
+        if (line.trim().startsWith(continuedCommentPattern) || line.trim().startsWith(commentPattern)) {
+          continue;
+        }
+        lines[n] = continuedCommentPattern + line;
+      } else {
+        if (!line.trim().startsWith(continuedCommentPattern) && !line.trim().startsWith(commentPattern)) {
+          continue;
+        }
+        lines[n] = line.replace(continuedCommentPattern, "");
+      }
+    }
+
+    const newQuery = lines.join('\n');
+
+    setQuery(newQuery);
+    setActiveQuery(newQuery);
+    
+  }, []);
 
 
   const onFilterChange = useCallback((columnName: string, value: string, operator: string) => {
