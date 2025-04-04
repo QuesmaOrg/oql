@@ -281,10 +281,11 @@ export function RowDetailPanel({ tabularResult, selectedRow, onClose, isOpen }: 
     }, 300);
   };
 
-
-
-
   if (selectedRow == null) {
+    return null;
+  }
+
+  if (selectedRow >= tabularResult.rows.length) {
     return null;
   }
 

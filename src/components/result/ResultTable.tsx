@@ -5,7 +5,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { TabularResult } from "../../lib/types";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RowDetailPanel } from "./RowDetailPanel";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
@@ -232,6 +232,11 @@ export function ResultTable({ tabularResult, onFilterChange, onOrderChange }: Re
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
+  useEffect(() => {
+    setIsDetailOpen(false);
+    setSelectedRow(null);
+  }, [tabularResult]);
 
   const handleRowClick = (row: number) => {
     setSelectedRow(row);
