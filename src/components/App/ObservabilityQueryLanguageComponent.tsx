@@ -195,7 +195,7 @@ export default function ObservabilityQueryLanguageComponent() {
     for (let n = lineNumber; n < lines.length; n++) {
       const line = lines[n];
 
-      if (line.trim() == "") {
+      if (line.trim() === "") {
         continue;
       }
 
