@@ -235,13 +235,14 @@ export const Editor: React.FC<EditorProps> = ({ query, onChange, startDate, endD
 		return () => window.removeEventListener('mousemove', handleMouseMove);
 	}, []);
 
-	initPipeSQLLanguage();
+	useEffect(() => {
+		initPipeSQLLanguage();
+	}, []);
 
 	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
 		editorRef.current = editor;
 
 		// Register language
-
 
 		// Add command for Ctrl/Cmd + Enter
 		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
