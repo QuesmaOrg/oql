@@ -252,20 +252,6 @@ export default function ObservabilityQueryLanguageComponent() {
     setActiveQuery(q);
   }, [query, tableDefinitions, currentTable]);
 
-  const onOrderChange = useCallback((columnName: string, order: string) => {
-
-    const newOrderBy = `|> ORDER BY ${columnName} ${order}`;
-    const lines = query.split('\n');
-    const index = lines.map((line: string) => line.toLowerCase().startsWith('|> order by')).lastIndexOf(true);
-    if (index !== -1) {
-      lines[index] = newOrderBy;
-    } else {
-      lines.push(newOrderBy);
-    }
-    const q = lines.join('\n');
-    setQuery(q);
-    setActiveQuery(q);
-  }, [query]);
 
   const handleAiModalAccept = useCallback((query: string) => {
     console.log("handleAiModalAccept", query);
@@ -396,7 +382,6 @@ export default function ObservabilityQueryLanguageComponent() {
               tabularResult={tabularResult}
               transpiledSQL={transpiledSQL}
               onFilterChange={onFilterChange}
-              onOrderChange={onOrderChange}
             />
           </div>
 

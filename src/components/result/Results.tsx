@@ -8,10 +8,9 @@ interface ResultsProps {
   tabularResult: TabularResult | null;
   transpiledSQL: string | null;
   onFilterChange: (columnName: string, value: string, operator: string) => void;
-  onOrderChange: (columnName: string, order: string) => void;
 }
 
-export function Results({ tabularResult, transpiledSQL, onFilterChange, onOrderChange }: ResultsProps) {
+export function Results({ tabularResult, transpiledSQL, onFilterChange}: ResultsProps) {
   const [showChart, setShowChart] = useState(false);
   const [canShowChart, setCanShowChart] = useState(false);
   const [showSQL, setShowSQL] = useState(false);
@@ -131,7 +130,6 @@ export function Results({ tabularResult, transpiledSQL, onFilterChange, onOrderC
         <ResultTable
           tabularResult={tabularResult}
           onFilterChange={onFilterChange}
-          onOrderChange={onOrderChange}
         />
       )}
     </div>

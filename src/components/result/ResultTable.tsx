@@ -225,10 +225,9 @@ function CompactCell({ columns, cells, startIndex, onFilterChange }: { columns: 
 interface ResultTableProps {
   tabularResult: TabularResult | null;
   onFilterChange: (columnName: string, value: string, operator: string) => void;
-  onOrderChange: (columnName: string, order: string) => void;
 }
 
-export function ResultTable({ tabularResult, onFilterChange, onOrderChange }: ResultTableProps) {
+export function ResultTable({ tabularResult, onFilterChange }: ResultTableProps) {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -280,42 +279,6 @@ export function ResultTable({ tabularResult, onFilterChange, onOrderChange }: Re
                   gap: '8px'
                 }}>
                   <div style={{ flex: 1, textAlign: 'center' }}>{column}</div>
-                  {column !== 'More Details' && (
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOrderChange(column, 'ASC');
-                          }}
-                          style={{
-                            border: 'none',
-                            background: 'none',
-                            cursor: 'pointer',
-                            padding: '2px 0',
-                            color: '#ccccdc'
-                          }}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOrderChange(column, 'DESC');
-                          }}
-                          style={{
-                            border: 'none',
-                            background: 'none',
-                            cursor: 'pointer',
-                            padding: '2px 0',
-                            color: '#ccccdc'
-                          }}
-                        >
-                          ↓
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </TableCell>
             ))}
