@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.32.2
 	github.com/DataDog/go-sqllexer v0.1.3
-	github.com/QuesmaOrg/quesma/platform v0.0.0-20250331153816-60b67f381c7d
+	github.com/QuesmaOrg/quesma/platform v0.0.0-20250408113329-603b815741fa
 	github.com/grafana/grafana-plugin-sdk-go v0.269.0
 	github.com/stretchr/testify v1.10.0
 )

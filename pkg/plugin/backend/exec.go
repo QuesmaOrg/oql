@@ -88,12 +88,9 @@ func HandleExec(w http.ResponseWriter, r *http.Request) {
 	pipe_syntax.GroupPipeSyntax(node)
 	pipe_syntax.ExpandMacros(node)
 	pipe_syntax.ExpandEnrichments(node, DefaultDB)
-	pipe_syntax.Transpile(node)
+	pipe_syntax.TranspileToCTE(node)
 
 	transpiledSQL = transforms.ConcatTokenNodes(node)
-
-	// Make the SQL pretty for now
-	prettyTranspiledSQL := SqlPrettyPrint([]byte(transpiledSQL))
 
 	log.Println("Transpiled SQL: ", transpiledSQL)
 
@@ -117,7 +114,7 @@ func HandleExec(w http.ResponseWriter, r *http.Request) {
 
 	response := ExecResponse{
 		Table:         res,
-		TranspiledSQL: prettyTranspiledSQL,
+		TranspiledSQL: transpiledSQL,
 	}
 
 	responseBody, err := json.Marshal(response)
