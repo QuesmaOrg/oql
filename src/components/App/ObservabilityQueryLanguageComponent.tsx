@@ -30,6 +30,7 @@ const defaultQuery = `FROM apache_logs
 |> LIMIT 100`;
 
 
+
 export default function ObservabilityQueryLanguageComponent() {
   // Add URL handling logic at the start of the component
   const getInitialQuery = () => {
