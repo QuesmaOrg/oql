@@ -12,17 +12,13 @@ import path from 'path';
 import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { SubresourceIntegrityPlugin } from 'webpack-subresource-integrity';
-import { type Configuration, BannerPlugin } from 'webpack';
+import webpack, { type Configuration } from 'webpack';
 import LiveReloadPlugin from 'webpack-livereload-plugin';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
-import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
-
-import { BuildModeWebpackPlugin } from './BuildModeWebpackPlugin';
-import { DIST_DIR, SOURCE_DIR } from './constants';
-import { getCPConfigVersion, getEntries, getPackageJson, getPluginJson, hasReadme, isWSL } from './utils';
-
-
+import { BuildModeWebpackPlugin } from './BuildModeWebpackPlugin.ts';
+import { DIST_DIR, SOURCE_DIR } from './constants.ts';
+import { getCPConfigVersion, getEntries, getPackageJson, getPluginJson, hasReadme, isWSL } from './utils.ts';
 
 const pluginJson = getPluginJson();
 const cpVersion = getCPConfigVersion();
@@ -38,12 +34,17 @@ __webpack_public_path__ =
 `,
 });
 
-const config = async (env): Promise<Configuration> => {
+export type Env = {
+  [key: string]: true | string | Env;
+};
+
+const config = async (env: Env): Promise<Configuration> => {
   const baseConfig: Configuration = {
     cache: {
       type: 'filesystem',
       buildDependencies: {
-        config: [__filename],
+        // __filename doesn't work in Node 24
+        config: [path.resolve(process.cwd(), '.config', 'webpack', 'webpack.config.ts')],
       },
     },
 
@@ -74,17 +75,17 @@ const config = async (env): Promise<Configuration> => {
       'react-router',
       'd3',
       'angular',
-      '@grafana/ui',
-      '@grafana/runtime',
-      '@grafana/data',
+      /^@grafana\/ui/i,
+      /^@grafana\/runtime/i,
+      /^@grafana\/data/i,
 
       // Mark legacy SDK imports as external if their name starts with the "grafana/" prefix
       ({ request }, callback) => {
         const prefix = 'grafana/';
-        const hasPrefix = (request) => request.indexOf(prefix) === 0;
-        const stripPrefix = (request) => request.substr(prefix.length);
+        const hasPrefix = (request: string) => request.indexOf(prefix) === 0;
+        const stripPrefix = (request: string) => request.substr(prefix.length);
 
-        if (hasPrefix(request)) {
+        if (request && hasPrefix(request)) {
           return callback(undefined, stripPrefix(request));
         }
 
@@ -155,10 +156,6 @@ const config = async (env): Promise<Configuration> => {
             filename: Boolean(env.production) ? '[hash][ext]' : '[file]',
           },
         },
-        {
-          test: /\.ttf$/,
-          type: 'asset/resource',
-        },
       ],
     },
 
@@ -194,14 +191,10 @@ const config = async (env): Promise<Configuration> => {
     },
 
     plugins: [
-      new MonacoWebpackPlugin({
-        languages: ['javascript', 'typescript', 'json'],
-        filename: '[name].worker.js',
-      }),
       new BuildModeWebpackPlugin(),
       virtualPublicPath,
       // Insert create plugin version information into the bundle
-      new BannerPlugin({
+      new webpack.BannerPlugin({
         banner: '/* [create-plugin] version: ' + cpVersion + ' */',
         raw: true,
         entryOnly: true,
@@ -270,10 +263,6 @@ const config = async (env): Promise<Configuration> => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
-      alias: {
-        // ... other aliases
-        'monaco-editor': path.resolve(__dirname, '../../node_modules/monaco-editor'),
-      },
       unsafeCache: true,
     },
   };
